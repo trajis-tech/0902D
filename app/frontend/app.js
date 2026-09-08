@@ -550,7 +550,7 @@
           `);
         }
         if (action === "openVersion") {
-          showDialog("版本資訊", `<p>X-ray 四 R 幾何與焊錫檢查 v31</p><p>本機 HTTP：${escapeHtml(window.location.origin)}</p><p>EXE 內含打包時預設設定；首次啟動會建立 D:\\XrayRegistrationData\\algorithm_config.json，之後使用該檔且不覆寫。修改 JSON 後重啟即可生效。</p><p>單張與批量上傳完全分流，包含 X/Y 理想輪廓平移、幾何 QA、批量 XLSX API 與單檔 EXE 建置腳本。</p>`);
+          showDialog("版本資訊", `<p>X-ray 四 R 幾何與焊錫檢查 v32</p><p>本機 HTTP：${escapeHtml(window.location.origin)}</p><p>EXE 內含打包時預設設定；首次啟動會建立 D:\\XrayRegistrationData\\algorithm_config.json，之後使用該檔且不覆寫。修改 JSON 後重啟即可生效。</p><p>單張與批量上傳完全分流，包含 X/Y 理想輪廓平移、幾何 QA、批量 XLSX API 與單檔 EXE 建置腳本。</p>`);
         }
       });
     });

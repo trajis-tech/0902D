@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Single-source runtime configuration for v31.
+"""Single-source runtime configuration for v32.
 
 Source mode reads ``algorithm_config.json`` from the project root.
 A frozen one-file EXE embeds the build-time JSON as its factory default. On the
@@ -141,8 +141,8 @@ def validate_config(cfg: Mapping[str, Any]) -> None:
     params = _object(cfg, "userParameters")
     required_user = {
         "rect_mu_pct", "rect_sigma2", "min_area_ratio", "rect_bin_pct",
-        "solder_reference_ceiling_pct", "solder_center_offset_pct",
-        "solder_transition_pct", "ideal_shift_max_px", "pair_min_distance_px",
+        "solder_reference_ceiling_pct", "solder_full_weight_offset_pct",
+        "void_zero_weight_offset_pct", "ideal_shift_max_px", "pair_min_distance_px",
         "relative_shift_warning_px", "crop_ratio",
     }
     missing = sorted(required_user - set(params))
@@ -157,7 +157,13 @@ def validate_config(cfg: Mapping[str, Any]) -> None:
     _number(params["ideal_shift_max_px"], "userParameters.ideal_shift_max_px", minimum=0.0)
     _number(params["pair_min_distance_px"], "userParameters.pair_min_distance_px", minimum=0.0)
     _number(params["relative_shift_warning_px"], "userParameters.relative_shift_warning_px", minimum=0.0)
-    _number(params["solder_transition_pct"], "userParameters.solder_transition_pct", minimum=0.000001)
+    _number(params["solder_full_weight_offset_pct"], "userParameters.solder_full_weight_offset_pct", minimum=0.0)
+    _number(params["void_zero_weight_offset_pct"], "userParameters.void_zero_weight_offset_pct", minimum=0.0)
+    if float(params["void_zero_weight_offset_pct"]) <= float(params["solder_full_weight_offset_pct"]):
+        raise ConfigError(
+            "userParameters.void_zero_weight_offset_pct must be > "
+            "userParameters.solder_full_weight_offset_pct"
+        )
 
     templates = _list(cfg, "uiParameterTemplates")
     keys = [item.get("key") for item in templates if isinstance(item, dict)]

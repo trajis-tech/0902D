@@ -27,9 +27,9 @@ from registration import (
 )
 from single_gauss import single_gaussian_map
 from solder_indication import (
-    DEFAULT_CENTER_OFFSET_PCT,
+    DEFAULT_SURE_SOLDER_OFFSET_PCT,
+    DEFAULT_SURE_VOID_OFFSET_PCT,
     DEFAULT_REFERENCE_CEILING_PCT,
-    DEFAULT_TRANSITION_PCT,
     DEFAULT_IDEAL_SHIFT_MAX_PX,
     DEFAULT_PAIR_MIN_DISTANCE_PX,
     DEFAULT_RELATIVE_SHIFT_WARNING_PX,
@@ -51,8 +51,8 @@ _FLOAT_KEYS = {
     "crop_ratio",
     "rect_bin_pct",
     "solder_reference_ceiling_pct",
-    "solder_center_offset_pct",
-    "solder_transition_pct",
+    "solder_full_weight_offset_pct",
+    "void_zero_weight_offset_pct",
     "ideal_shift_max_px",
     "pair_min_distance_px",
     "relative_shift_warning_px",
@@ -78,8 +78,8 @@ def coerce_params(params: Dict[str, Any]) -> Dict[str, Any]:
             out[key] = default
     for key, default in (
         ("solder_reference_ceiling_pct", DEFAULT_REFERENCE_CEILING_PCT),
-        ("solder_center_offset_pct", DEFAULT_CENTER_OFFSET_PCT),
-        ("solder_transition_pct", DEFAULT_TRANSITION_PCT),
+        ("solder_full_weight_offset_pct", DEFAULT_SURE_SOLDER_OFFSET_PCT),
+        ("void_zero_weight_offset_pct", DEFAULT_SURE_VOID_OFFSET_PCT),
     ):
         try:
             value = float(out[key])
@@ -300,6 +300,11 @@ def run_pipeline(image_path: str, param_values: Dict[str, Any]) -> Dict[str, Any
         np.asarray(contour, dtype=np.float64)
         for contour in registered_ideal.get("contoursCanonical", [])
     ]
+    sure_solder_offset_pct = float(params["solder_full_weight_offset_pct"])
+    sure_void_offset_pct = float(params["void_zero_weight_offset_pct"])
+    center_offset_pct = (sure_solder_offset_pct + sure_void_offset_pct) / 2.0
+    transition_pct = sure_void_offset_pct - sure_solder_offset_pct
+
     (
         solder_metric,
         solder_weight_canonical,
@@ -311,11 +316,13 @@ def run_pipeline(image_path: str, param_values: Dict[str, Any]) -> Dict[str, Any
         registered_contours,
         g,
         float(params["solder_reference_ceiling_pct"]),
-        float(params["solder_center_offset_pct"]),
-        float(params["solder_transition_pct"]),
+        center_offset_pct,
+        transition_pct,
         max_shift_px=float(params["ideal_shift_max_px"]),
         step_px=float(_POSITION_OPTIMIZATION_CFG["stepPx"]),
     )
+    solder_metric["configuredSolderFullWeightOffsetPctG"] = sure_solder_offset_pct
+    solder_metric["configuredVoidZeroWeightOffsetPctG"] = sure_void_offset_pct
     if len(shifted_canonical) != 4:
         shifted_canonical = [contour.copy() for contour in registered_contours]
         shift_diagnostics = [
@@ -391,7 +398,7 @@ def run_pipeline(image_path: str, param_values: Dict[str, Any]) -> Dict[str, Any
         "confidence": float(registered_ideal.get("confidence") or 0.0),
         "regionCount": int(len(shifted_canonical)),
         "okCount": int(len(shifted_canonical)) if analysis_ok else 0,
-        "algorithmVersion": "analytic-stadium-xy-void-min-v31",
+        "algorithmVersion": "analytic-stadium-xy-void-min-v32",
         "registrationScore": float(registered_ideal.get("registrationScore") or 0.0),
         "registrationTransform": registered_ideal.get("registrationTransform") or [],
         "registrationLocalTransform": registered_ideal.get("registrationLocalTransform") or [],
@@ -448,7 +455,7 @@ def run_pipeline(image_path: str, param_values: Dict[str, Any]) -> Dict[str, Any
         },
         "regionCount": int(len(shifted_canonical)),
         "okCount": int(len(shifted_canonical)) if analysis_ok else 0,
-        "algorithmVersion": "ideal-only-geometry-qa-v31",
+        "algorithmVersion": "ideal-only-geometry-qa-v32",
         "warning": "；".join(alerts),
         "rectSource": rect.get("source"),
         **orientation.as_metrics(),

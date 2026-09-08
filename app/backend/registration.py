@@ -31,7 +31,7 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
 else:
     ASSET_DIR = Path(__file__).resolve().parent.parent / "assets" / "board_v1"
 
-ALGORITHM_VERSION = "ideal-geometry-registration-v31"
+ALGORITHM_VERSION = "ideal-geometry-registration-v32"
 IDEAL_ALGORITHM_VERSION = "analytic-stadium-prior-v2"
 
 

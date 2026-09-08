@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""X-ray four-R geometry and solder inspection local backend (v31).
+"""X-ray four-R geometry and solder inspection local backend (v32).
 
 - No Flask
 - Python standard library HTTP server
@@ -666,7 +666,7 @@ def main() -> None:
         raise SystemExit(1)
     url = f"http://{HOST}:{PORT}"
     print("=" * 72)
-    print("X-ray 四 R 幾何與焊錫檢查 v31")
+    print("X-ray 四 R 幾何與焊錫檢查 v32")
     print(f"Project root : {PROJECT_ROOT}")
     print(f"Data root    : {DATA_ROOT}")
     print(f"Python       : {sys.executable}")

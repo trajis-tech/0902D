@@ -36,7 +36,7 @@ def _show_error_dialog(message: str) -> None:
         return
     try:
         import ctypes
-        ctypes.windll.user32.MessageBoxW(None, message, "XrayRegistration v31 startup error", 0x10)
+        ctypes.windll.user32.MessageBoxW(None, message, "XrayRegistration v32 startup error", 0x10)
     except Exception:
         pass
 

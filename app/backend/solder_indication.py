@@ -27,14 +27,18 @@ _SOLDER_REFERENCE_CFG = section("solderReference")
 _POSITION_CFG = section("positionOptimization")
 _RESULT_RENDER_CFG = section("resultRender")
 
-ALGORITHM_VERSION = "solder-indication-ideal-v31"
+ALGORITHM_VERSION = "solder-indication-ideal-v32"
 DISPLAY_NAME = "焊錫顯影占比"
 POLARITY = "dark"
 CLASSIFICATION_MODE = "solder-relative-linear-gray-membership"
 REFERENCE_METHOD = "pooled-roi-conservative-dark-mode"
 DEFAULT_REFERENCE_CEILING_PCT = float(_USER_DEFAULTS["solder_reference_ceiling_pct"])
-DEFAULT_CENTER_OFFSET_PCT = float(_USER_DEFAULTS["solder_center_offset_pct"])
-DEFAULT_TRANSITION_PCT = float(_USER_DEFAULTS["solder_transition_pct"])
+DEFAULT_SURE_SOLDER_OFFSET_PCT = float(_USER_DEFAULTS["solder_full_weight_offset_pct"])
+DEFAULT_SURE_VOID_OFFSET_PCT = float(_USER_DEFAULTS["void_zero_weight_offset_pct"])
+# Keep the existing measurement implementation internally expressed as center + width.
+# The public/runtime knobs are now the two independent endpoints.
+DEFAULT_CENTER_OFFSET_PCT = (DEFAULT_SURE_SOLDER_OFFSET_PCT + DEFAULT_SURE_VOID_OFFSET_PCT) / 2.0
+DEFAULT_TRANSITION_PCT = DEFAULT_SURE_VOID_OFFSET_PCT - DEFAULT_SURE_SOLDER_OFFSET_PCT
 MIN_REFERENCE_SEED_PIXELS = int(_SOLDER_REFERENCE_CFG["minSeedPixels"])
 MIN_REFERENCE_SEED_FRACTION = float(_SOLDER_REFERENCE_CFG["minSeedFraction"])
 MIN_REFERENCE_PEAK_FRACTION = float(_SOLDER_REFERENCE_CFG["minPeakFraction"])
@@ -782,7 +786,7 @@ def render_solder_indication_stage(
     return overlay
 
 # ---------------------------------------------------------------------------
-# v31 ideal-only X/Y optimization and geometry QA
+# v32 ideal-only X/Y optimization and geometry QA
 # ---------------------------------------------------------------------------
 IDEAL_SHIFT_ALGORITHM_VERSION = "ideal-xy-void-min-v3"
 DEFAULT_IDEAL_SHIFT_MAX_PX = float(_USER_DEFAULTS["ideal_shift_max_px"])

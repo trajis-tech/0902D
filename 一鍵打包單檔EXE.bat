@@ -51,7 +51,7 @@ echo Building truly portable one-file EXE...
     --onefile ^
     --console ^
     --noupx ^
-    --name "XrayRegistration_v31" ^
+    --name "XrayRegistration_v32" ^
     --paths "app\backend" ^
     --add-data "algorithm_config.json;." ^
     --add-data "app\frontend;app\frontend" ^
@@ -70,7 +70,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo Done: dist\XrayRegistration_v31.exe
+echo Done: dist\XrayRegistration_v32.exe
 echo No JSON file is required beside the EXE.
 echo First run creates D:\XrayRegistrationData\algorithm_config.json from the embedded build-time default.
 echo Later runs reuse the existing JSON. Edit it and restart the EXE to apply changes.
