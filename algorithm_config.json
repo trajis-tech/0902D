@@ -1,0 +1,309 @@
+{
+  "configVersion": 2,
+  "appVersion": "0.9-v31-embedded-default-config",
+  "reloadPolicy": "restart_required",
+  "notes": "All runtime-adjustable algorithm, geometry, rendering, local-server, and storage settings are centralized here. Runtime-generated data is stored under runtime.dataRoot. Edit this file and restart the app/EXE.",
+  "userParameters": {
+    "rect_mu_pct": -8.42,
+    "rect_sigma2": 25.0,
+    "min_area_ratio": 0.05,
+    "rect_bin_pct": -4.16,
+    "solder_reference_ceiling_pct": -46.22,
+    "solder_center_offset_pct": 12.79,
+    "solder_transition_pct": 9.58,
+    "ideal_shift_max_px": 30.0,
+    "pair_min_distance_px": 10.0,
+    "relative_shift_warning_px": 10.0,
+    "crop_ratio": 0.5
+  },
+  "uiParameterTemplates": [
+    {
+      "key": "rect_mu_pct",
+      "label": "單高斯 μ 相對 G",
+      "type": "number",
+      "description": "μ_rect' = G × (1 + 此值/100)。x 原檔 G−8.42% 約為 172。單位：%"
+    },
+    {
+      "key": "rect_sigma2",
+      "label": "單高斯 σ²",
+      "type": "number",
+      "description": "鏈 A 變異數，規格維持 25（不是灰階）"
+    },
+    {
+      "key": "min_area_ratio",
+      "label": "最小面積比",
+      "type": "number",
+      "description": "候選矩形面積須達整張影像的比例"
+    },
+    {
+      "key": "rect_bin_pct",
+      "label": "找框二值相對 G",
+      "type": "number",
+      "description": "原圖 THRESH_BINARY 門檻 = G × (1 + 此值/100)，非反轉。x 原檔約為 180。單位：%"
+    },
+    {
+      "key": "solder_reference_ceiling_pct",
+      "label": "焊錫基準候選上限",
+      "type": "number",
+      "description": "僅用來排除太白的氣泡/空焊像素，再從四個理想 ROI 的暗色主峰估計焊錫灰階基準 S。候選上限 = G × (1 + 此值/100)。單位：%"
+    },
+    {
+      "key": "solder_center_offset_pct",
+      "label": "顯影中心相對焊錫色",
+      "type": "number",
+      "description": "顯影中心 = 焊錫灰階基準 S + G × 此值/100；分類錨點是 S，G 只作灰階差的尺度。單位：%"
+    },
+    {
+      "key": "solder_transition_pct",
+      "label": "焊錫顯影過渡寬度",
+      "type": "number",
+      "description": "以 S 為錨點時，確定焊錫到確定空缺的完整灰階跨度；用 G 的百分比表達，不做平滑或連通擴張。單位：%"
+    },
+    {
+      "key": "ideal_shift_max_px",
+      "label": "理想輪廓 X/Y 搜尋範圍",
+      "type": "number",
+      "description": "每顆解析式理想膠囊沿 X 與 Y 軸平移的最大搜尋距離（像素）。程式以 1 px 步進搜尋，使 raw X-ray 加權空焊面積占比最小；尺寸、角度與形狀不變。"
+    },
+    {
+      "key": "pair_min_distance_px",
+      "label": "同排兩 R 最小距離",
+      "type": "number",
+      "description": "R1-R2 或 R3-R4 的輪廓邊界最短距離若小於此值，整體檢查直接 FAIL。單位：px。"
+    },
+    {
+      "key": "relative_shift_warning_px",
+      "label": "四 R 位移離散警告值",
+      "type": "number",
+      "description": "四個 R 的最佳 dx 或 dy 最大值減最小值，任一方向大於此值即輸出 WARNING。單位：px。"
+    },
+    {
+      "key": "crop_ratio",
+      "label": "中央裁剪比例",
+      "type": "number",
+      "description": "裁剪寬高為大矩形的此比例，中心對齊"
+    }
+  ],
+  "userParameterLimits": {
+    "ideal_shift_max_px": [
+      0.0,
+      80.0
+    ],
+    "pair_min_distance_px": [
+      0.0,
+      100.0
+    ],
+    "relative_shift_warning_px": [
+      0.0,
+      160.0
+    ],
+    "crop_ratio": [
+      0.01,
+      1.0
+    ],
+    "min_area_ratio": [
+      1e-06,
+      1.0
+    ],
+    "rect_sigma2": [
+      1e-06,
+      1000000.0
+    ],
+    "solder_transition_pct": [
+      1e-06,
+      200.0
+    ]
+  },
+  "productDetection": {
+    "backgroundStripFraction": 0.1,
+    "openKernelRatio": 0.004,
+    "openKernelMinPx": 3,
+    "fullFrameRejectAreaRatio": 0.92,
+    "fullFrameRejectWidthRatio": 0.98,
+    "fullFrameRejectHeightRatio": 0.98,
+    "outsideDilateKernelPx": 3
+  },
+  "orientation": {
+    "minScore": 0.9,
+    "minMargin": 0.05,
+    "maxWidth": 640,
+    "featureMinWidth": 64,
+    "featureMinHeight": 32,
+    "featureSigma": 2.0,
+    "normalizePercentileLow": 2.0,
+    "normalizePercentileHigh": 98.0,
+    "normalizeMinRange": 1.0,
+    "eccMaxIterations": 150,
+    "eccEpsilon": 1e-06,
+    "eccGaussianFilterSize": 5
+  },
+  "registration": {
+    "productPoseMinScore": 0.85,
+    "productPoseMaxWidth": 512,
+    "productPoseMinWorkWidth": 128,
+    "productPoseMinWorkHeight": 64,
+    "productPoseMaxIterations": 120,
+    "normalizePercentileLow": 2.0,
+    "normalizePercentileHigh": 98.0,
+    "normalizeMinRange": 1.0,
+    "featureSigma": 1.5,
+    "eccEpsilon": 1e-06,
+    "eccGaussianFilterSize": 5,
+    "maskRadiusScale": 1.65,
+    "maskStraightExtensionRadiusScale": 0.35,
+    "maskBorderRatio": 0.01,
+    "maskMinBorderPx": 2,
+    "maskMinValidFraction": 0.25,
+    "maxTranslationRatio": 0.12,
+    "minScale": 0.85,
+    "maxScale": 1.15,
+    "capSamples": 181,
+    "idealMinContourPoints": 32,
+    "idealMinAreaPixels": 100,
+    "contourSupportStride": 4,
+    "eccMinIterations": 20
+  },
+  "solderReference": {
+    "minSeedPixels": 64,
+    "minSeedFraction": 0.05,
+    "histogramSigmaMinGray": 1.0,
+    "histogramSigmaRatioOfG": 0.01,
+    "peakRadiusSigmaMultiplier": 2.0,
+    "minPeakFraction": 0.02
+  },
+  "positionOptimization": {
+    "stepPx": 1.0
+  },
+  "rasterization": {
+    "supersample": 4,
+    "maskThreshold": 128,
+    "overlayLineThicknessSupersampled": 4
+  },
+  "resultRender": {
+    "outsideDimFactor": 0.3,
+    "voidOverlayMaxAlpha": 0.35,
+    "voidColorBgr": [
+      0,
+      165,
+      255
+    ],
+    "contourColorBgr": [
+      255,
+      255,
+      0
+    ],
+    "contourLineThicknessPx": 1,
+    "statusColorsBgr": {
+      "PASS": [
+        60,
+        210,
+        80
+      ],
+      "WARNING": [
+        0,
+        210,
+        255
+      ],
+      "FAIL": [
+        40,
+        40,
+        235
+      ],
+      "UNAVAILABLE": [
+        190,
+        190,
+        190
+      ]
+    },
+    "textColorBgr": [
+      245,
+      245,
+      245
+    ],
+    "fontScale": 0.48,
+    "lineHeightPx": 20,
+    "panelMinWidthPx": 250,
+    "panelWidthFraction": 0.24,
+    "panelTopPaddingPx": 12,
+    "panelDimFactor": 0.22,
+    "textOriginXPx": 10,
+    "textFirstBaselineYPx": 18,
+    "fontThicknessPx": 1
+  },
+  "runtime": {
+    "host": "127.0.0.1",
+    "port": 8768,
+    "autoOpenBrowser": true,
+    "maxSingleUploadMb": 80,
+    "maxBatchUploadMb": 512,
+    "maxBatchFiles": 500,
+    "maxJsonMb": 2,
+    "defaultOutputListLimit": 200,
+    "dataRoot": "D:\\XrayRegistrationData"
+  },
+  "idealGeometry": {
+    "geometry": "analytic-stadium",
+    "cropShape": [
+      193,
+      538
+    ],
+    "capsules": [
+      {
+        "id": 1,
+        "center": [
+          161.50006103515625,
+          50.96322250366211
+        ],
+        "axis": [
+          0.9999998715373986,
+          -0.0005068778811275944
+        ],
+        "straightHalfLength": 63.665611267089844,
+        "radius": 21.334495544433594,
+        "fitIou": 0.9683643069938999
+      },
+      {
+        "id": 2,
+        "center": [
+          358.962646484375,
+          51.241249084472656
+        ],
+        "axis": [
+          0.9999980557316234,
+          0.0019719363511569873
+        ],
+        "straightHalfLength": 66.29287528991699,
+        "radius": 21.17399787902832,
+        "fitIou": 0.9717736463563578
+      },
+      {
+        "id": 3,
+        "center": [
+          159.97415161132812,
+          146.56703186035156
+        ],
+        "axis": [
+          0.9999972516286258,
+          -0.002344511717786021
+        ],
+        "straightHalfLength": 65.71547508239746,
+        "radius": 20.942583084106445,
+        "fitIou": 0.9745974458634092
+      },
+      {
+        "id": 4,
+        "center": [
+          359.43182373046875,
+          147.6078643798828
+        ],
+        "axis": [
+          0.9999858975309172,
+          -0.005310813429798292
+        ],
+        "straightHalfLength": 63.68361854553223,
+        "radius": 22.193532943725586,
+        "fitIou": 0.9567750677506776
+      }
+    ]
+  }
+}

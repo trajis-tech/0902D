@@ -1,0 +1,14 @@
+{
+  "assetVersion": "board-v1-ideal-registration-v26",
+  "sourceName": "1.jpg",
+  "sourceFileSha256": "781DD36955E239230D72D39E2731F1BE4BF185903AD2027C09EB2850ED8D6279",
+  "cropShape": [
+    193,
+    538
+  ],
+  "orientationReferenceShape": [
+    387,
+    1076
+  ],
+  "canonicalRawCropPixelSha256": "568D5D9731F246B91B9A4CEC9E1F11B53F7B33498C3EAC31F98C7B7DBC420490"
+}

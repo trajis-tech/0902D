@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <title>X-ray 四 R 幾何與焊錫檢查 v31</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/frontend/styles.css?v=20260820-zoom1" />
+</head>
+<body class="app-shell">
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-mark" aria-hidden="true">X</div>
+      <div class="brand-copy">
+        <h1>X-ray 四 R 幾何與焊錫檢查</h1>
+      </div>
+    </div>
+    <nav class="toolbar" aria-label="功能列">
+      <div class="toolbar-item">
+        <button type="button" class="toolbar-btn" data-toolbar="file" aria-haspopup="menu" aria-expanded="false">檔案</button>
+        <div class="toolbar-menu" role="menu" hidden>
+          <div class="toolbar-menu-label" role="presentation">參數</div>
+          <button type="button" class="toolbar-menu-item" role="menuitem" data-action="importParams">匯入參數</button>
+          <button type="button" class="toolbar-menu-item" role="menuitem" data-action="exportParams">匯出參數</button>
+          <button type="button" class="toolbar-menu-item" role="menuitem" data-action="resetParams">值重設為預設</button>
+          <div class="toolbar-menu-sep" role="separator"></div>
+          <div class="toolbar-menu-label" role="presentation">輸出</div>
+          <button type="button" class="toolbar-menu-item" role="menuitem" data-action="downloadOverlay">下載檢查結果圖</button>
+        </div>
+      </div>
+      <div class="toolbar-item">
+        <button type="button" class="toolbar-btn" data-toolbar="process" aria-haspopup="menu" aria-expanded="false">處理設置</button>
+        <div class="toolbar-menu" role="menu" hidden>
+          <button type="button" class="toolbar-menu-item" role="menuitem" data-workspace-focus="params">參數</button>
+          <button type="button" class="toolbar-menu-item" role="menuitem" data-workspace-focus="preview">預覽</button>
+        </div>
+      </div>
+      <div class="toolbar-item">
+        <button type="button" class="toolbar-btn" data-toolbar="help" aria-haspopup="menu" aria-expanded="false">說明</button>
+        <div class="toolbar-menu" role="menu" hidden>
+          <button type="button" class="toolbar-menu-item" role="menuitem" data-action="openHelp">處理流程</button>
+          <button type="button" class="toolbar-menu-item" role="menuitem" data-action="openVersion">版本資訊</button>
+        </div>
+      </div>
+    </nav>
+    <div class="topbar-end">
+      <div class="badge" id="appVersionBadge">v0.1</div>
+    </div>
+  </header>
+
+  <section class="workspace-ribbon" aria-label="工作區導覽">
+    <div class="ribbon-context">
+      <span class="ribbon-eyebrow">目前影像</span>
+      <strong id="workspaceImageName">尚未載入影像</strong>
+      <span id="workspaceImageMeta">尚未處理</span>
+    </div>
+    <div class="ribbon-stages" aria-label="工作區步驟">
+      <button type="button" data-workspace-focus="image"><span>01</span>影像</button>
+      <button type="button" data-workspace-focus="params"><span>02</span>參數</button>
+      <button type="button" data-workspace-focus="preview"><span>03</span>預覽</button>
+    </div>
+    <div class="ribbon-status" aria-live="polite">
+      <i id="workspaceStatusIndicator" class="status-indicator is-neutral"></i>
+      <strong id="workspaceStatusMirror">待機</strong>
+    </div>
+  </section>
+
+  <main class="layout">
+    <section class="panel control-panel" id="controlPanel">
+      <div class="workspace-scroll">
+        <div class="block" id="imageBlock">
+          <div class="section-title">
+            <h2>匯入 X-ray 影像</h2>
+          </div>
+          <div class="upload-mode-card" id="singleUploadCard">
+            <div class="upload-mode-title">
+              <h3>單張檢查</h3>
+              <span id="imageStatus" class="inline-status">尚未載入</span>
+            </div>
+            <label class="field">
+              <span>單張灰階影像</span>
+              <input id="imageFileInput" type="file" accept=".jpg,.jpeg,.png,.bmp,.tif,.tiff,.webp,image/*" />
+            </label>
+            <div class="mini-button-row">
+              <button type="button" class="secondary compact-btn" id="loadSampleBtn">載入單張範例</button>
+              <button type="button" class="primary compact-btn" id="processBtn">處理單張影像</button>
+            </div>
+          </div>
+          <div class="upload-mode-card" id="batchUploadCard">
+            <div class="upload-mode-title">
+              <h3>批量檢查</h3>
+              <span id="batchStatus" class="inline-status">尚未選擇</span>
+            </div>
+            <label class="field">
+              <span>批量影像（可多選）</span>
+              <input id="batchFileInput" type="file" multiple accept=".jpg,.jpeg,.png,.bmp,.tif,.tiff,.webp,image/*" />
+            </label>
+            <div class="mini-button-row">
+              <button type="button" class="secondary compact-btn" id="batchProcessBtn">處理批量並下載 XLSX</button>
+            </div>
+          </div>
+          <p class="hint">兩種上傳互相獨立。下方「處理單張影像」只使用單張檔；批量按鈕只使用批量清單並下載 XLSX。</p>
+        </div>
+
+        <div class="block" id="paramsBlock">
+          <div class="section-title">
+            <h2>處理參數</h2>
+          </div>
+          <p class="hint">預設與所有內部判定參數集中在<code>D:\XrayRegistrationData\algorithm_config.json</code>。直接修改 JSON 後重啟程式即可生效；此處修改只覆寫本次處理的公開參數。</p>
+          <div id="paramsForm" class="params-form"></div>
+        </div>
+
+        <div class="block" id="summaryBlock">
+          <div class="section-title">
+            <h2>結果摘要</h2>
+          </div>
+          <dl id="metricsList" class="metrics-list">
+            <div><dt>狀態</dt><dd>尚未處理</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="control-actions">
+        <button type="button" class="secondary" id="downloadBtn">下載目前預覽</button>
+      </div>
+    </section>
+
+    <section class="panel preview-panel" id="previewPanel">
+      <div class="section-title preview-title">
+        <h2>檢查結果</h2>
+        <div class="preview-tools">
+          <div class="stage-tabs" id="stageTabs" role="tablist"></div>
+          <div class="zoom-toolbar" aria-label="放大檢視">
+            <button type="button" class="secondary compact-btn" id="zoomFitBtn">適合視窗</button>
+            <button type="button" class="secondary compact-btn" id="zoomOneBtn">100%</button>
+            <button type="button" class="secondary compact-btn" id="zoomOutBtn" aria-label="縮小">－</button>
+            <button type="button" class="secondary compact-btn" id="zoomInBtn" aria-label="放大">＋</button>
+            <span id="zoomLabel" class="zoom-label">—</span>
+          </div>
+        </div>
+      </div>
+      <div class="preview-scroll" id="previewViewport">
+        <div id="previewBox" class="preview-box">
+          <p class="preview-placeholder">載入影像並執行後，唯一結果圖會顯示於此。滾輪放大、拖曳平移。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="statusbar">Ctrl+Enter 單張處理　·　批量可直接下載 XLSX　·　PASS / WARNING / FAIL 幾何判定</footer>
+
+  <input id="paramFileInput" type="file" accept="application/json,.json" hidden />
+
+  <div id="dialogLayer" class="dialog-layer" hidden aria-hidden="true">
+    <div class="dialog" role="dialog" aria-modal="true">
+      <div class="dialog-head">
+        <h3 id="dialogTitle">說明</h3>
+        <button type="button" class="icon-btn" id="dialogCloseBtn" aria-label="關閉">×</button>
+      </div>
+      <div class="dialog-body" id="dialogBody"></div>
+    </div>
+  </div>
+
+  <script src="/frontend/app.js?v=20260908-v31"></script>
+</body>
+</html>
